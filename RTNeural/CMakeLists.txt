@@ -40,12 +40,19 @@ add_library(RTNeural STATIC
 
 set_property(TARGET RTNeural PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_target_properties(RTNeural PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(RTNeural
-    PUBLIC
-        ../modules/json
-    INTERFACE
-        ..
-)
+
+option(RTNEURAL_USE_BUNDLED_JSON "Use the nlohmann/json.hpp version bundled in this project" ON)
+if(RTNEURAL_USE_BUNDLED_JSON)
+    target_include_directories(RTNeural
+        PUBLIC
+            ../modules/json
+    )
+endif()
+
+target_include_directories (RTNeural
+   INTERFACE
+       ..)
+
 set(RTNEURAL_NAMESPACE "RTNeural" CACHE STRING "Namespace to use for RTNeural code")
 target_compile_definitions(RTNeural
     PUBLIC
