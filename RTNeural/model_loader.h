@@ -1,9 +1,9 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
 #include "Model.h"
 #include <fstream>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <string>
 
 #if !RTNEURAL_NO_DEBUG
