@@ -1,4 +1,4 @@
-add_library(RTNeural STATIC
+add_library(RTNeural INTERFACE
     activation/activation.h
     activation/activation_eigen.h
     activation/activation_xsimd.h
@@ -35,7 +35,6 @@ add_library(RTNeural STATIC
     batchnorm/batchnorm2d_eigen.tpp
     model_loader.h
     RTNeural.h
-    RTNeural.cpp
 )
 
 set_property(TARGET RTNeural PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -44,7 +43,7 @@ set_target_properties(RTNeural PROPERTIES LINKER_LANGUAGE CXX)
 option(RTNEURAL_USE_BUNDLED_JSON "Use the nlohmann/json.hpp version bundled in this project" ON)
 if(RTNEURAL_USE_BUNDLED_JSON)
     target_include_directories(RTNeural
-        PUBLIC
+        INTERFACE
             ../modules/json
     )
 endif()
@@ -55,7 +54,7 @@ target_include_directories (RTNeural
 
 set(RTNEURAL_NAMESPACE "RTNeural" CACHE STRING "Namespace to use for RTNeural code")
 target_compile_definitions(RTNeural
-    PUBLIC
+    INTERFACE
         RTNEURAL_NAMESPACE=${RTNEURAL_NAMESPACE}
 )
 
