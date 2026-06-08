@@ -58,6 +58,10 @@ target_compile_definitions(RTNeural
         RTNEURAL_NAMESPACE=${RTNEURAL_NAMESPACE}
 )
 
+target_compile_features (RTNeural
+    INTERFACE
+        cxx_std_20)
+
 if(RTNEURAL_ENABLE_RADSAN)
     rtneural_radsan_configure(RTNeural)
 endif()
