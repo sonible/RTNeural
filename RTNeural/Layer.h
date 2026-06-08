@@ -8,7 +8,7 @@ namespace RTNEURAL_NAMESPACE
 {
 
 /** Virtual base class for a generic neural network layer. */
-template <typename T>
+template <std::floating_point T>
 class Layer
 {
 public:

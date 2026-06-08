@@ -30,7 +30,7 @@ namespace RTNEURAL_NAMESPACE
  *  Instances of this class should typically be created
  *  `json_parser::parseJson`.
  */
-template <typename T>
+template <std::floating_point T>
 class Model
 {
 public:
