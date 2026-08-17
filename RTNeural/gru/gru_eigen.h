@@ -43,6 +43,21 @@ public:
     /** Returns the name of this layer. */
     std::string getName() const noexcept override { return "gru"; }
 
+    /** Copies the recurrent state h(t) into dest, which must hold out_size elements. */
+    RTNEURAL_REALTIME void getState(T* dest) const noexcept
+    {
+        for(int i = 0; i < Layer<T>::out_size; ++i)
+            dest[i] = extendedHt1(i);
+    }
+
+    /** Restores the recurrent state from src, as written by getState(). */
+    RTNEURAL_REALTIME void setState(const T* src) noexcept
+    {
+        // extendedHt1(out_size) is the bias fold and stays at 1.
+        for(int i = 0; i < Layer<T>::out_size; ++i)
+            extendedHt1(i) = src[i];
+    }
+
     /** Performs forward propagation for this layer. */
     RTNEURAL_REALTIME inline void forward(const T* input, T* h) noexcept override
     {
@@ -203,6 +218,31 @@ public:
 
     /** Resets the state of the GRU. */
     RTNEURAL_REALTIME void reset();
+
+    /** Copies the recurrent state h(t) into dest, which must hold out_size elements. */
+    RTNEURAL_REALTIME void getState(T* dest) const noexcept
+    {
+        static_assert(sampleRateCorr == SampleRateCorrectionMode::None,
+            "State accessors do not cover the sample rate correction delay line");
+
+        for(int i = 0; i < out_sizet; ++i)
+            dest[i] = extendedHt1(i);
+    }
+
+    /** Restores the recurrent state from src, as written by getState(). */
+    RTNEURAL_REALTIME void setState(const T* src) noexcept
+    {
+        static_assert(sampleRateCorr == SampleRateCorrectionMode::None,
+            "State accessors do not cover the sample rate correction delay line");
+
+        // extendedHt1(out_size) is the bias fold and stays at 1.
+        for(int i = 0; i < out_sizet; ++i)
+            extendedHt1(i) = src[i];
+
+        // outs is a copy of the state, not the state itself -- keep it coherent
+        // so that a read straight after a restore sees the restored values.
+        computeOutput();
+    }
 
     /** Performs forward propagation for this layer. */
     RTNEURAL_REALTIME inline void forward(const in_type& ins) noexcept
