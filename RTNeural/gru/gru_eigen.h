@@ -5,6 +5,7 @@
 #include "../common.h"
 #include "../config.h"
 #include "../maths/maths_eigen.h"
+#include <span>
 
 namespace RTNEURAL_NAMESPACE
 {
@@ -42,6 +43,24 @@ public:
 
     /** Returns the name of this layer. */
     std::string getName() const noexcept override { return "gru"; }
+
+    /** Returns the recurrent state h(t). */
+    RTNEURAL_REALTIME std::span<const T> getState() const noexcept
+    {
+        return std::span<const T>(extendedHt1.data(), Layer<T>::out_size);
+    }
+
+    /** Restores the recurrent state from src, as written by getState().
+
+        The size of src must match out_size.
+     */
+    RTNEURAL_REALTIME void setState(std::span<const T> src) noexcept
+    {
+        assert(src.size() == Layer<T>::out_size);
+
+        // extendedHt1(out_size) is the bias fold and stays at 1.
+        std::copy_n(src.data(), Layer<T>::out_size, extendedHt1.data());
+    }
 
     /** Performs forward propagation for this layer. */
     RTNEURAL_REALTIME inline void forward(const T* input, T* h) noexcept override
@@ -203,6 +222,29 @@ public:
 
     /** Resets the state of the GRU. */
     RTNEURAL_REALTIME void reset();
+
+    /** Returns the recurrent state h(t). */
+    RTNEURAL_REALTIME std::span<const T, out_size> getState() const noexcept
+    {
+        static_assert(sampleRateCorr == SampleRateCorrectionMode::None,
+            "State accessors do not cover the sample rate correction delay line");
+
+        return std::span<const T, out_sizet>(extendedHt1.data(), out_size);
+    }
+
+    /** Restores the recurrent state from src, as written by getState(). */
+    RTNEURAL_REALTIME void setState(std::span<const T, out_size> src) noexcept
+    {
+        static_assert(sampleRateCorr == SampleRateCorrectionMode::None,
+            "State accessors do not cover the sample rate correction delay line");
+
+        // extendedHt1(out_size) is the bias fold and stays at 1.
+        std::copy_n(src.data(), out_size, extendedHt1.data());
+
+        // outs is a copy of the state, not the state itself -- keep it coherent
+        // so that a read straight after a restore sees the restored values.
+        computeOutput();
+    }
 
     /** Performs forward propagation for this layer. */
     RTNEURAL_REALTIME inline void forward(const in_type& ins) noexcept
